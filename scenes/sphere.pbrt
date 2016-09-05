@@ -1,0 +1,132 @@
+
+Film "image"
+	"integer xresolution" [300] "integer yresolution" [300]
+    "string filename" "sphere.exr"
+
+Sampler "lowdiscrepancy" "integer pixelsamples" [16] 
+PixelFilter "box"
+
+LookAt -1 2.8 8  0 .8 0   0 1 0
+Camera "perspective" "float fov" [22]
+
+SurfaceIntegrator "directlighting"
+
+WorldBegin
+
+AttributeBegin
+  CoordSysTransform "camera"
+  AreaLightSource "area" "color L" [12 12 12  ] "integer nsamples" [16]
+  Translate .1 1.5 -10
+  Material "matte" "color Kd" [ 0 0 0 ]
+  Shape "disk" "float radius" [3] 
+AttributeEnd
+
+AttributeBegin
+  AreaLightSource "area" "color L" [2 2 2] "integer nsamples" [16]
+  Translate 0 10 2
+  Rotate 90 1 0 0 
+  Material "matte" "color Kd" [ 0 0 0 ]
+  Shape "disk" "float radius" [10] 
+AttributeEnd
+
+AttributeBegin
+  Material "matte" "color Kd" [.8 .8 .8 ]
+  Shape "trianglemesh" "integer indices" [ 0 1 2 2 0 3 ]
+    "point P" [-10 0 -10   10 0 -10   10 0 10   -10 0 10 ]
+  Shape "trianglemesh" "integer indices" [ 0 1 2 2 0 3 ]
+    "point P" [-10 0 -10   10 0 -10   10 9 -10   -10 9 -10 ]
+  Shape "trianglemesh" "integer indices" [ 0 1 2 2 0 3 ]
+    "point P" [-10 0 -10   -10 0 10   -10 9 10   -10 9 -10 ]
+AttributeEnd
+
+Material "uber" "color Kd" [.8 .7 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 0
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.4 .7 .8 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -1
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.2 .8 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -2
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+
+
+Material "uber" "color Kd" [.8 .7 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -3
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.4 .7 .8 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -4
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.2 .8 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -5
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+
+
+Material "uber" "color Kd" [.8 .7 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -6
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.4 .7 .8 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -7
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.2 .8 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -8
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+
+
+Material "uber" "color Kd" [.8 .7 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -9
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.4 .7 .8 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -10
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+Material "uber" "color Kd" [.2 .8 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+AttributeBegin
+Translate 0 1 -11
+Rotate 330 1 0 1
+Shape "sphere" "float radius" [1] "float phimax" [45]
+AttributeEnd
+
+WorldEnd
