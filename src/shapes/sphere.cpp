@@ -50,8 +50,14 @@ Sphere::Sphere(const Transform *o2w, const Transform *w2o, bool ro,
 
 
 BBox Sphere::ObjectBound() const {
-    return BBox(Point(-radius, -radius, zmin),
-                Point( radius,  radius, zmax));
+    float xmax = 1.f;
+    float xmin = cosf(Clamp(phiMax, Radians(90.f), Radians(180.f)));
+
+    float ymax = sinf(Clamp(phiMax, 0.f,            Radians(90.f)));
+    float ymin = sinf(Clamp(phiMax, Radians(180.f), Radians(270.f)));
+
+    return BBox(Point(radius * xmin, radius * ymin, zmin),
+                Point(radius * xmax, radius * ymax, zmax));
 }
 
 
