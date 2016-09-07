@@ -116,6 +116,7 @@
 #include "textures/fbm.h"
 #include "textures/imagemap.h"
 #include "textures/marble.h"
+#include "textures/trunk.h"
 #include "textures/mix.h"
 #include "textures/scale.h"
 #include "textures/uv.h"
@@ -436,6 +437,8 @@ Reference<Texture<float> > MakeFloatTexture(const string &name,
         tex = CreateWrinkledFloatTexture(tex2world, tp);
     else if (name == "marble")
         tex = CreateMarbleFloatTexture(tex2world, tp);
+    else if (name == "trunk")
+        tex = CreateTrunkFloatTexture(tex2world, tp);
     else if (name == "windy")
         tex = CreateWindyFloatTexture(tex2world, tp);
     else
@@ -470,6 +473,8 @@ Reference<Texture<Spectrum> > MakeSpectrumTexture(const string &name,
         tex = CreateWrinkledSpectrumTexture(tex2world, tp);
     else if (name == "marble")
         tex = CreateMarbleSpectrumTexture(tex2world, tp);
+    else if (name == "trunk")
+        tex = CreateTrunkSpectrumTexture(tex2world, tp);
     else if (name == "windy")
         tex = CreateWindySpectrumTexture(tex2world, tp);
     else

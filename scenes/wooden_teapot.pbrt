@@ -1,0 +1,29 @@
+LookAt 18 5.5 2    15.5 .9 10   0 1 0
+Camera "perspective" "float fov" [40]
+PixelFilter "mitchell" "float xwidth" [2] "float ywidth" [2]
+Sampler "bestcandidate"
+Film "image" "string filename" ["wood.exr"]
+     "integer xresolution" [800] "integer yresolution" [800]
+
+WorldBegin
+AttributeBegin
+  CoordSysTransform "camera"
+  LightSource "distant"
+              "point from" [0 0 0] "point to"   [0 0 1]
+              "rgb L"    [3 3 3]
+AttributeEnd
+
+AttributeBegin
+Texture "wood_texture" "color" "trunk"
+	"point trunk_center" [15 1.5 10]
+	"vector trunk_up" [0 0.8 0.6]
+	"float ring_count" [24]
+
+Material "matte"
+       "texture Kd" "wood_texture"
+
+Translate 15 0 10
+Scale 1.25 1.25 1.25
+Include "geometry/room-teapot.pbrt"
+AttributeEnd
+WorldEnd
