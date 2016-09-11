@@ -5,6 +5,8 @@ Sampler "bestcandidate"
 Film "image" "string filename" ["wood.exr"]
      "integer xresolution" [800] "integer yresolution" [800]
 
+Accelerator "octree" "integer leaf_size" [25]
+
 WorldBegin
 AttributeBegin
   CoordSysTransform "camera"
