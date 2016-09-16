@@ -1,0 +1,76 @@
+Film "image"
+	"integer xresolution" [512]
+	"integer yresolution" [512]
+
+LookAt 0 3 5    -2 0 0  0 1 0
+Camera "perspective"
+	"float fov" [60]
+
+Sampler "lowdiscrepancy"
+	"integer pixelsamples" [16]
+
+# PixelFilter "mitchell"
+#     "float xwidth" [2]
+#     "float ywidth" [2]
+
+Sampler "bestcandidate"
+
+SurfaceIntegrator "dipolesubsurface"
+	"float minsampledistance" [.1]
+	"float maxerror" [.05]
+
+WorldBegin
+
+	# background image
+	DifferentialBackground
+		"string filename" "textures/buildingblock.exr"
+		#"string type" "exponential"
+		"float exposure" [1]
+		"float scale" [1]
+
+	# distant scene
+	AttributeBegin
+		# Rotate 90 1 0 0
+	    LightSource "infinite"
+	    	"integer nsamples" [16]
+	    	"color L" [2 2 2] 			# Control the light intensity with these values
+	        "string mapname" ["textures/Road_to_MonumentValley_Ref.exr"]
+	AttributeEnd
+
+	# local scene
+	AttributeBegin
+		Texture "tmap" "color"
+			"imagemap" "string filename" "textures/buildingblock.exr"
+			"float uscale" 6
+			"float vscale" 6
+		Material "substrate"
+			"texture Kd" "tmap"
+
+		# Material "uber" "color Kd" [.8 .7 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+		Shape "trianglemesh"
+			"integer indices" [0 1 2 0 3 2 ]
+		    "point P" [ -10 0 -10  10 0 -10   10 0 10   -10 0 10 ]
+	AttributeEnd
+
+	# synthetic objects
+	SyntheticSceneBegin
+		AttributeBegin
+			Material "kdsubsurface" "color Kd" [ .6 .6 .7] "float meanfreepath" [.9]
+			# Material "kdsubsurface"	"color Kd" [ .05 .05 .05] "color sigma_prime_s" [3 3 3]
+			# Material "measured" "string filename" "brdfs/mystique.brdf"
+			# Material "uber" "color Kd" [.8 .7 .4 ] "color Ks" [.05 .05 .05] "float roughness" [.01]
+
+			Translate -1.6 0 2
+			Scale 0.75 0.75 0.75
+			Include "geometry/room-teapot.pbrt"
+		AttributeEnd
+	SyntheticSceneEnd
+
+	# # sphere for testing radiance map
+	# AttributeBegin
+	# 	Material "mirror"
+	# 	Translate -1.6 1.1 1
+	# 	Shape "sphere" "float radius" [1]
+	# AttributeEnd
+
+WorldEnd

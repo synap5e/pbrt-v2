@@ -84,5 +84,8 @@ void pbrtObjectBegin(const string &name);
 void pbrtObjectEnd();
 void pbrtObjectInstance(const string &name);
 void pbrtWorldEnd();
+void pbrtDifferentialBackground(const ParamSet &params);
+void pbrtSyntheticSceneBegin();
+void pbrtSyntheticSceneEnd();
 
 #endif // PBRT_CORE_API_H

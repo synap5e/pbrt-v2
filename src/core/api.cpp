@@ -41,6 +41,7 @@
 #include "film.h"
 #include "volume.h"
 #include "probes.h"
+#include "imageio.h"
 
 // API Additional Headers
 #include "accelerators/bvh.h"
@@ -133,6 +134,8 @@
  #endif
 using std::map;
 
+#include <limits>
+
 // API Global Variables
 Options PbrtOptions;
 
@@ -167,9 +170,12 @@ private:
 struct RenderOptions {
     // RenderOptions Public Methods
     RenderOptions();
-    Scene *MakeScene();
+    Scene *MakeScene(bool, bool);
     Camera *MakeCamera() const;
     Renderer *MakeRenderer() const;
+
+    bool differentialRender;
+    float* filmMemoryDestination;
 
     // RenderOptions Public Data
     float transformStartTime, transformEndTime;
@@ -190,14 +196,18 @@ struct RenderOptions {
     TransformSet CameraToWorld;
     vector<Light *> lights;
     vector<Reference<Primitive> > primitives;
+    vector<bool> primitiveIsSynthetic;
     mutable vector<VolumeRegion *> volumeRegions;
     map<string, vector<Reference<Primitive> > > instances;
     vector<Reference<Primitive> > *currentInstance;
+    ParamSet differentialBackground;
 };
 
 
 RenderOptions::RenderOptions() {
     // RenderOptions Constructor Implementation
+    differentialRender = false;
+    filmMemoryDestination = nullptr;
     transformStartTime = 0.f;
     transformEndTime = 1.f;
     FilterName = "box";
@@ -284,6 +294,7 @@ static vector<GraphicsState> pushedGraphicsStates;
 static vector<TransformSet> pushedTransforms;
 static vector<uint32_t> pushedActiveTransformBits;
 static TransformCache transformCache;
+static bool inSyntheticScene = false;
 
 // API Macros
 #define VERIFY_INITIALIZED(func) \
@@ -668,11 +679,10 @@ Filter *MakeFilter(const string &name,
 }
 
 
-Film *MakeFilm(const string &name,
-    const ParamSet &paramSet, Filter *filter) {
+Film *MakeFilm(const string &name, float* filmMemoryDestination, const ParamSet &paramSet, Filter *filter) {
     Film *film = NULL;
     if (name == "image")
-        film = CreateImageFilm(paramSet, filter);
+        film = CreateImageFilm(filmMemoryDestination, paramSet, filter);
     else
         Warning("Film \"%s\" unknown.", name.c_str());
     paramSet.ReportUnused();
@@ -1059,6 +1069,7 @@ void pbrtShape(const string &name, const ParamSet &params) {
     }
     
     else {
+        renderOptions->primitiveIsSynthetic.push_back(inSyntheticScene);
         renderOptions->primitives.push_back(prim);
         if (area != NULL) {
             renderOptions->lights.push_back(area);
@@ -1151,10 +1162,12 @@ void pbrtObjectInstance(const string &name) {
         world2instance[1], renderOptions->transformEndTime);
     Reference<Primitive> prim =
         new TransformedPrimitive(in[0], animatedWorldToInstance);
+    renderOptions->primitiveIsSynthetic.push_back(inSyntheticScene);
     renderOptions->primitives.push_back(prim);
 }
 
-
+#include <iostream>
+using namespace std;
 void pbrtWorldEnd() {
     VERIFY_WORLD("WorldEnd");
     // Ensure there are no pushed graphics states
@@ -1169,12 +1182,92 @@ void pbrtWorldEnd() {
     }
 
     // Create scene and render
-    Renderer *renderer = renderOptions->MakeRenderer();
-    Scene *scene = renderOptions->MakeScene();
-    if (scene && renderer) renderer->Render(scene);
-    TasksCleanup();
-    delete renderer;
-    delete scene;
+    if (renderOptions->differentialRender){
+
+        // get the background
+        string filename = renderOptions->differentialBackground.FindOneFilename("filename", "");
+        if (filename.empty()){
+            Error("Differential rendering requires a 'filename' for a background");
+            exit(-1);
+        }
+        int width, height;
+        RGBSpectrum *background = ReadImage(filename, &width, &height);
+        if (width != renderOptions->FilmParams.FindOneInt("xresolution", 0) || height != renderOptions->FilmParams.FindOneInt("yresolution", 0)){
+            Error("Background image must match render size");
+            exit(-1);
+        }
+
+        // render the full scene (local + synthetic)
+        std::cout << "Rendering full scene" << std::endl;
+        float *full = new float[width * height * 3];
+        renderOptions->filmMemoryDestination = full;
+        Renderer *fullRenderer = renderOptions->MakeRenderer();
+        Scene *fullScene = renderOptions->MakeScene(true, true);
+        fullRenderer->Render(fullScene);
+        WriteImage("full.exr", full, NULL, width, height, width, height, 0, 0);
+
+        // render only the local scene
+        std::cout << "Rendering local scene" << std::endl;
+        float *local = new float[width * height * 3];
+        renderOptions->filmMemoryDestination = local;
+        Renderer *localRenderer = renderOptions->MakeRenderer();
+        Scene *localScene = renderOptions->MakeScene(false, true);
+        localRenderer->Render(localScene);
+        WriteImage("local.exr", local, NULL, width, height, width, height, 0, 0);
+
+        // render only the synthetic scene
+        std::cout << "Rendering synthetic scene" << std::endl;
+        float *synthetic = new float[width * height * 3];
+        renderOptions->filmMemoryDestination = synthetic;
+        Renderer *syntheticRenderer = renderOptions->MakeRenderer();
+        Scene *syntheticScene = renderOptions->MakeScene(true, false);
+        syntheticRenderer->Render(syntheticScene);
+        WriteImage("synthetic.exr", synthetic, NULL, width, height, width, height, 0, 0);
+
+        // render only the environment map
+        std::cout << "Rendering empty scene" << std::endl;
+        float *environment = new float[width * height * 3];
+        renderOptions->filmMemoryDestination = environment;
+        Renderer *environmentRenderer = renderOptions->MakeRenderer();
+        Scene *environmentScene = renderOptions->MakeScene(false, false);
+        environmentRenderer->Render(environmentScene);
+        WriteImage("environment.exr", environment, NULL, width, height, width, height, 0, 0);
+
+        float *mask = new float[width * height];
+        for (int i=0; i<width*height; ++i){
+            float diff = fabs(synthetic[i*3 + 0] - environment[i*3 + 0]) +
+                            fabs(synthetic[i*3 + 1] - environment[i*3 + 1]) +
+                            fabs(synthetic[i*3 + 2] - environment[i*3 + 2]);
+            mask[i] = diff > std::numeric_limits<float>::epsilon() ? 1 : 0;
+        }
+        WriteImage("mask.exr", mask, NULL, width, height, width, height, 0, 0);
+
+        float *syntheticLighting = new float[width * height * 3];
+        for (int i=0; i<width*height; ++i){
+            syntheticLighting[i*3 + 0] = (full[i*3 + 0]- local[i*3 + 0]) * (1.f - mask[i]);
+            syntheticLighting[i*3 + 1] = (full[i*3 + 1]- local[i*3 + 1]) * (1.f - mask[i]);
+            syntheticLighting[i*3 + 2] = (full[i*3 + 2]- local[i*3 + 2]) * (1.f - mask[i]);
+        }
+        WriteImage("syntheticLighting.exr", syntheticLighting, NULL, width, height, width, height, 0, 0);
+
+        float *composit = new float[width * height * 3];
+        for (int i=0; i<width*height; ++i){
+            float bg[3];
+            background[i].ToRGB(bg);
+            composit[i*3 + 0] = bg[0] * (1.f - mask[i]) + full[i*3 + 0] * mask[i] + syntheticLighting[i*3 + 0];
+            composit[i*3 + 1] = bg[1] * (1.f - mask[i]) + full[i*3 + 1] * mask[i] + syntheticLighting[i*3 + 1];
+            composit[i*3 + 2] = bg[2] * (1.f - mask[i]) + full[i*3 + 2] * mask[i] + syntheticLighting[i*3 + 2];
+        }
+        WriteImage("composit.exr", composit, NULL, width, height, width, height, 0, 0);
+
+    } else {
+        Renderer *renderer = renderOptions->MakeRenderer();
+        Scene *scene = renderOptions->MakeScene(true, true);
+        if (scene && renderer) renderer->Render(scene);
+        TasksCleanup();
+        delete renderer;
+        delete scene;
+    }
 
     // Clean up after rendering
     graphicsState = GraphicsState();
@@ -1190,8 +1283,7 @@ void pbrtWorldEnd() {
     ImageTexture<RGBSpectrum, Spectrum>::ClearCache();
 }
 
-
-Scene *RenderOptions::MakeScene() {
+Scene *RenderOptions::MakeScene(bool includeSynthetic, bool includeLocal) {
     // Initialize _volumeRegion_ from volume region(s)
     VolumeRegion *volumeRegion;
     if (volumeRegions.size() == 0)
@@ -1200,17 +1292,24 @@ Scene *RenderOptions::MakeScene() {
         volumeRegion = volumeRegions[0];
     else
         volumeRegion = new AggregateVolume(volumeRegions);
-    Primitive *accelerator = MakeAccelerator(AcceleratorName,
-        primitives, AcceleratorParams);
+
+    vector<Reference<Primitive>> renderPrimitives;
+    for (std::size_t i = 0; i != primitives.size(); ++i) {
+        bool isSynthetic = primitiveIsSynthetic[i];
+        if ((includeSynthetic && isSynthetic) || (includeLocal && !isSynthetic)){
+            renderPrimitives.push_back(primitives[i]);
+        }
+    }
+    Primitive *accelerator = MakeAccelerator(AcceleratorName, renderPrimitives, AcceleratorParams);
     if (!accelerator)
-        accelerator = MakeAccelerator("bvh", primitives, ParamSet());
+        accelerator = MakeAccelerator("bvh", renderPrimitives, ParamSet());
     if (!accelerator)
         Severe("Unable to create \"bvh\" accelerator.");
     Scene *scene = new Scene(accelerator, lights, volumeRegion);
     // Erase primitives, lights, and volume regions from _RenderOptions_
-    primitives.erase(primitives.begin(), primitives.end());
-    lights.erase(lights.begin(), lights.end());
-    volumeRegions.erase(volumeRegions.begin(), volumeRegions.end());
+    // primitives.erase(primitives.begin(), primitives.end());
+    // lights.erase(lights.begin(), lights.end());
+    // volumeRegions.erase(volumeRegions.begin(), volumeRegions.end());
     return scene;
 }
 
@@ -1279,7 +1378,7 @@ Renderer *RenderOptions::MakeRenderer() const {
 
 Camera *RenderOptions::MakeCamera() const {
     Filter *filter = MakeFilter(FilterName, FilterParams);
-    Film *film = MakeFilm(FilmName, FilmParams, filter);
+    Film *film = MakeFilm(FilmName, renderOptions->filmMemoryDestination, FilmParams, filter);
     if (!film) Severe("Unable to create film.");
     Camera *camera = ::MakeCamera(CameraName, CameraParams,
         CameraToWorld, renderOptions->transformStartTime,
@@ -1288,4 +1387,15 @@ Camera *RenderOptions::MakeCamera() const {
     return camera;
 }
 
+void pbrtDifferentialBackground(const ParamSet &params){
+    renderOptions->differentialRender = true;
+    renderOptions->differentialBackground = params;
+}
 
+void pbrtSyntheticSceneBegin() {
+    inSyntheticScene = true;
+}
+
+void pbrtSyntheticSceneEnd() {
+    inSyntheticScene = false;
+}

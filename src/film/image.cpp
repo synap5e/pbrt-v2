@@ -39,8 +39,8 @@
 
 // ImageFilm Method Definitions
 ImageFilm::ImageFilm(int xres, int yres, Filter *filt, const float crop[4],
-                     const string &fn, bool openWindow)
-    : Film(xres, yres) {
+                     const string &fn, bool openWindow, float *filmMemoryDestination)
+    : Film(xres, yres), filmMemoryDestination(filmMemoryDestination) {
     filter = filt;
     memcpy(cropWindow, crop, 4 * sizeof(float));
     filename = fn;
@@ -205,8 +205,12 @@ void ImageFilm::WriteImage(float splatScale) {
     }
 
     // Write RGB image
-    ::WriteImage(filename, rgb, NULL, xPixelCount, yPixelCount,
-                 xResolution, yResolution, xPixelStart, yPixelStart);
+    if (filmMemoryDestination == nullptr){
+        ::WriteImage(filename, rgb, NULL, xPixelCount, yPixelCount,
+                     xResolution, yResolution, xPixelStart, yPixelStart);
+    } else {
+        memcpy(filmMemoryDestination, rgb, xResolution*yResolution*3*sizeof(float));
+    }
 
     // Release temporary image memory
     delete[] rgb;
@@ -218,7 +222,7 @@ void ImageFilm::UpdateDisplay(int x0, int y0, int x1, int y1,
 }
 
 
-ImageFilm *CreateImageFilm(const ParamSet &params, Filter *filter) {
+ImageFilm *CreateImageFilm(float *filmMemoryDestination, const ParamSet &params, Filter *filter) {
     // Intentionally use FindOneString() rather than FindOneFilename() here
     // so that the rendered image is left in the working directory, rather
     // than the directory the scene file lives in.
@@ -254,7 +258,7 @@ ImageFilm *CreateImageFilm(const ParamSet &params, Filter *filter) {
         crop[3] = Clamp(max(cr[2], cr[3]), 0., 1.);
     }
 
-    return new ImageFilm(xres, yres, filter, crop, filename, openwin);
+    return new ImageFilm(xres, yres, filter, crop, filename, openwin, filmMemoryDestination);
 }
 
 
