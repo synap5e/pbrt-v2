@@ -1240,7 +1240,11 @@ void pbrtWorldEnd() {
                             fabs(synthetic[i*3 + 2] - environment[i*3 + 2]);
             mask[i] = diff > std::numeric_limits<float>::epsilon() ? 1 : 0;
         }
-        WriteImage("mask.exr", mask, NULL, width, height, width, height, 0, 0);
+        float *maskVis = new float[width * height * 3];
+        for (int i=0; i<width*height; ++i){
+            maskVis[i*3 + 0] = maskVis[i*3 + 1] = maskVis[i*3 + 2] = mask[i];
+        }
+        WriteImage("mask.exr", maskVis, NULL, width, height, width, height, 0, 0);
 
         float *syntheticLighting = new float[width * height * 3];
         for (int i=0; i<width*height; ++i){
@@ -1248,7 +1252,13 @@ void pbrtWorldEnd() {
             syntheticLighting[i*3 + 1] = (full[i*3 + 1]- local[i*3 + 1]) * (1.f - mask[i]);
             syntheticLighting[i*3 + 2] = (full[i*3 + 2]- local[i*3 + 2]) * (1.f - mask[i]);
         }
-        WriteImage("syntheticLighting.exr", syntheticLighting, NULL, width, height, width, height, 0, 0);
+        float *syntheticLightingVis = new float[width * height * 3];
+        for (int i=0; i<width*height; ++i){
+            syntheticLightingVis[i*3 + 0] = 0.5f + syntheticLighting[i*3 + 0];
+            syntheticLightingVis[i*3 + 1] = 0.5f + syntheticLighting[i*3 + 1];
+            syntheticLightingVis[i*3 + 2] = 0.5f + syntheticLighting[i*3 + 2];
+        }
+        WriteImage("syntheticLighting.exr", syntheticLightingVis, NULL, width, height, width, height, 0, 0);
 
         float *composit = new float[width * height * 3];
         for (int i=0; i<width*height; ++i){
@@ -1259,6 +1269,9 @@ void pbrtWorldEnd() {
             composit[i*3 + 2] = bg[2] * (1.f - mask[i]) + full[i*3 + 2] * mask[i] + syntheticLighting[i*3 + 2];
         }
         WriteImage("composit.exr", composit, NULL, width, height, width, height, 0, 0);
+
+        // FIXME: delete used memory
+        // FIXME: remove intermediate exr output
 
     } else {
         Renderer *renderer = renderOptions->MakeRenderer();
