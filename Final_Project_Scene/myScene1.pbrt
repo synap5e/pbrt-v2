@@ -1,0 +1,116 @@
+Film "image"
+	"integer xresolution" [768]
+	"integer yresolution" [512]
+	"string filename" ["myScene1.exr"]
+
+Sampler "lowdiscrepancy"
+	"integer pixelsamples" [16]
+
+# PixelFilter "mitchell"
+#     "float xwidth" [2]
+#     "float ywidth" [2]
+
+Sampler "bestcandidate"
+
+SurfaceIntegrator "dipolesubsurface"
+	"float minsampledistance" [.1]
+	"float maxerror" [.05]
+	
+Accelerator "bvh"
+	"integer maxnodeprims" [7]
+
+
+Scale -1 1 1
+LookAt 8.586028 -34.986996 32.457020
+	-5.611997 38.446437 -37.852906
+	-0.169883 0.664192 0.728004
+
+Camera "perspective"
+	"float fov" [65.470453]
+	"float focaldistance" [102.652514]
+	"float lensradius" [0.002500]
+	"float screenwindow" [-1.000000 1.000000 -0.666667 0.666667]
+	"float shutteropen" [0.000000]
+	"float shutterclose" [1.000000]
+
+
+WorldBegin
+
+	# background image
+	DifferentialBackground
+		"string filename" ["textures/background.exr"]
+		"string type" "exponential"
+		"float exposure" [5]
+		#"float scale" [1]
+
+	# distant scene
+	AttributeBegin
+		Rotate 90 0 0 1
+		Scale -1 1 1
+	    LightSource "infinite"
+			"integer nsamples" [16]
+			"color L" [1.5 1.2 1] 			# Control the light intensity with these values
+			"string mapname" ["textures/envMap.exr"]
+	AttributeEnd
+	
+	# Directional Light |directionalLight1|directionalLightShape1
+	TransformBegin
+		ConcatTransform [0.268711 -0.886019 0.377841 0.000000
+						 0.788770 -0.022736 -0.614268 0.000000
+						 0.552844 0.463091 0.692756 0.000000
+						 0.047996 -0.001383 9.771755 1.000000]
+		LightSource "distant"
+			"color L" [1 1 1]
+			"point from" [0 0 0]
+			"point to" [0 0 -1]
+	TransformEnd
+	
+	# local scene
+	AttributeBegin
+		Texture "tmap" "color"
+			"imagemap" "string filename" "textures/chessboard.exr"
+			"float uscale" 1
+			"float vscale" 1
+		Material "matte" "texture Kd" "tmap"
+
+		Include "myScene1.local.pbrt"
+	AttributeEnd
+
+	
+# Translated Lambert Material lambert1
+MakeNamedMaterial "lambert1" "string type" ["matte"]
+	 "color Kd" [1 1 1] 
+
+# Translated Lambert Material board
+MakeNamedMaterial "board" "string type" ["matte"]
+	 "color Kd" [1.000000 1.000000 1.000000] 
+	 
+# Translated Blinn Material phong1 (Black)
+MakeNamedMaterial "phong1" "string type" ["substrate"] "color Kd" [.01 .005 .007 ] "color Ks" [0.7 0.6 0.5] "float uroughness" [0.01] "float vroughness" [0.1]
+
+# Translated Blinn Material phong2 (White)
+MakeNamedMaterial "phong2" "string type" ["plastic"] "color Kd" [.87 .72 .4 ] "color Ks" [1 1 1] "float roughness" [.001] #"float vroughness" [.001]
+# MakeNamedMaterial "phong2" "string type" ["subsurface"] 
+# "color sigma_a" [ .001 .002 .005] "color sigma_prime_s" [7 5 2] "float index" [1.46] "float scale" [.1]
+
+        #AttributeBegin
+        #CoordSysTransform "camera"
+        #LightSource "distant" "color I" [ .7 .7 .5 ] "point from" [0 0 0] "point to" [1.0 -1.0 1.0]
+        #LightSource "distant" "color I" [ .2 .2 .35 ] "point from" [0 0 0] "point to" [0.0 0.0 1.0]
+        #AttributeEnd
+
+	# synthetic objects
+	SyntheticSceneBegin
+		Include "myScene1.synth.pbrt"
+		
+		AttributeBegin
+	 	Material "mirror"
+	 	Translate -1.6 1.1 1
+	 	#Shape "sphere" "float radius" [3]
+	AttributeEnd
+	SyntheticSceneEnd
+
+# Include "myScene1.areaLgt.pbrt"
+
+
+WorldEnd
