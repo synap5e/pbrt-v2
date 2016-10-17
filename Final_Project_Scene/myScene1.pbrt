@@ -69,7 +69,7 @@ WorldBegin
 	AttributeBegin
 		Texture "tmap" "color"
 			"imagemap" "string filename" "textures/chessboard.exr"
-			"float uscale" 1
+			"float uscale" -1
 			"float vscale" 1
 		Material "matte" "texture Kd" "tmap"
 
