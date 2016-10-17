@@ -60,7 +60,7 @@ WorldBegin
 						 0.552844 0.463091 0.692756 0.000000
 						 0.047996 -0.001383 9.771755 1.000000]
 		LightSource "distant"
-			"color L" [1 1 1]
+			"color L" [2.7 2.35 2.4]
 			"point from" [0 0 0]
 			"point to" [0 0 -1]
 	TransformEnd
@@ -68,10 +68,10 @@ WorldBegin
 	# local scene
 	AttributeBegin
 		Texture "tmap" "color"
-			"imagemap" "string filename" "textures/chessboard.exr"
+			"imagemap" "string filename" "textures/chessboard4.exr"
 			"float uscale" -1
 			"float vscale" 1
-		Material "matte" "texture Kd" "tmap"
+		Material "uber" "texture Kd" "tmap"
 
 		Include "myScene1.local.pbrt"
 	AttributeEnd
