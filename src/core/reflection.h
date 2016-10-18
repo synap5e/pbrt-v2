@@ -191,6 +191,7 @@ private:
 #define MAX_BxDFS 8
     BxDF *bxdfs[MAX_BxDFS];
     friend class MixMaterial;
+	friend class AddMaterial;
 };
 
 

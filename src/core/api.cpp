@@ -83,7 +83,9 @@
 #include "materials/measured.h"
 #include "materials/metal.h"
 #include "materials/mirror.h"
+#include "materials/chessPieceBlack.h"
 #include "materials/mixmat.h"
+#include "materials/addmat.h"
 #include "materials/plastic.h"
 #include "materials/substrate.h"
 #include "materials/subsurface.h"
@@ -402,12 +404,32 @@ Reference<Material> MakeMaterial(const string &name,
 
         material = CreateMixMaterial(mtl2world, mp, mat1, mat2);
     }
+	else if (name == "add") {
+		string m1 = mp.FindString("namedmaterial1", "");
+		string m2 = mp.FindString("namedmaterial2", "");
+		Reference<Material> mat1 = graphicsState.namedMaterials[m1];
+		Reference<Material> mat2 = graphicsState.namedMaterials[m2];
+		if (!mat1) {
+			Error("Named material \"%s\" undefined.  Using \"matte\"",
+				m1.c_str());
+			mat1 = MakeMaterial("matte", curTransform[0], mp);
+		}
+		if (!mat2) {
+			Error("Named material \"%s\" undefined.  Using \"matte\"",
+				m2.c_str());
+			mat2 = MakeMaterial("matte", curTransform[0], mp);
+		}
+
+		material = CreateAddMaterial(mtl2world, mp, mat1, mat2);
+	}
     else if (name == "metal")
         material = CreateMetalMaterial(mtl2world, mp);
     else if (name == "substrate")
         material = CreateSubstrateMaterial(mtl2world, mp);
     else if (name == "uber")
         material = CreateUberMaterial(mtl2world, mp);
+	else if (name == "blackchesspiece")
+		material = CreateChessPieceBlackMaterial(mtl2world, mp);
     else if (name == "subsurface")
         material = CreateSubsurfaceMaterial(mtl2world, mp);
     else if (name == "kdsubsurface")

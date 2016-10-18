@@ -67,11 +67,25 @@ WorldBegin
 	
 	# local scene
 	AttributeBegin
-		Texture "tmap" "color"
+	Texture "tmap" "color"
 			"imagemap" "string filename" "textures/chessboard4.exr"
-			"float uscale" -1
-			"float vscale" 1
-		Material "uber" "texture Kd" "tmap"
+			"float uscale" 1
+			"float vscale" -1
+			
+		Texture "tmap2" "color"
+			"imagemap" "string filename" "textures/background.exr"
+			"float uscale" 1
+			"float vscale" -1
+
+		# Translated Lambert Material table
+		MakeNamedMaterial "board" "string type" ["uber"] "texture Kd" "tmap" 
+		MakeNamedMaterial "table" "string type" ["uber"] "texture Kd" "tmap2" 
+	
+		#Texture "tmap" "color"
+		#	"imagemap" "string filename" "textures/chessboard4.exr"
+		#	"float uscale" 1
+		#	"float vscale" -1
+		#Material "uber" "texture Kd" "tmap"
 
 		Include "myScene1.local.pbrt"
 	AttributeEnd
@@ -86,7 +100,9 @@ MakeNamedMaterial "board" "string type" ["matte"]
 	 "color Kd" [1.000000 1.000000 1.000000] 
 	 
 # Translated Blinn Material phong1 (Black)
-MakeNamedMaterial "phong1" "string type" ["substrate"] "color Kd" [.01 .005 .007 ] "color Ks" [0.7 0.6 0.5] "float uroughness" [0.01] "float vroughness" [0.1]
+MakeNamedMaterial "blackSpecularity" "string type" "plastic" "color Kd" [0 0 0 ] "color Ks" [0.4 0.4 0.4] "float roughness" [0.01]
+MakeNamedMaterial "blackMaterial" "string type" "blackchesspiece" "string type" "blackchesspiece" "color Kd" [0.02 0.02 0.02 ] "color Ks" [0.7 0.7 0.7] "color Kr" [0.1 0.1 0.1] "float uroughness" [0.3] "float vroughness" [0.5]  "float index" [1.4]
+MakeNamedMaterial "phong1" "string type" "add" "float amount" [1] "string namedmaterial1" "blackSpecularity" "string namedmaterial2" "blackMaterial"
 
 # Translated Blinn Material phong2 (White)
 MakeNamedMaterial "phong2" "string type" ["plastic"] "color Kd" [.87 .72 .4 ] "color Ks" [1 1 1] "float roughness" [.001] #"float vroughness" [.001]
