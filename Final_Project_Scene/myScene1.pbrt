@@ -39,7 +39,7 @@ WorldBegin
 
 	# background image
 	DifferentialBackground
-		"string filename" ["textures/background2.exr"]
+		"string filename" ["textures/background.exr"]
 		"string type" "exponential"
 		"float exposure" [5]
 		#"float scale" [1]
