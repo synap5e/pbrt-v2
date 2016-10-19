@@ -41,6 +41,7 @@
 #include "progressreporter.h"
 #include "camera.h"
 #include "intersection.h"
+#include "lights/infinite.h"
 
 static uint32_t hash(char *key, uint32_t len)
 {
@@ -238,8 +239,15 @@ Spectrum SamplerRenderer::Li(const Scene *scene,
                                    rng, arena);
     else {
         // Handle ray that doesn't intersect any geometry
-        for (uint32_t i = 0; i < scene->lights.size(); ++i)
-           Li += scene->lights[i]->Le(ray);
+        for (uint32_t i = 0; i < scene->lights.size(); ++i){
+            Li += scene->lights[i]->Le(ray);
+            /*
+            if(InfiniteAreaLight* v = dynamic_cast<InfiniteAreaLight*>(scene->lights[i])) {
+            } else {
+            }
+            */
+
+        }
     }
     Spectrum Lvi = volumeIntegrator->Li(scene, this, ray, sample, rng,
                                         T, arena);

@@ -62,14 +62,20 @@ struct InfiniteAreaCube {
 InfiniteAreaLight::~InfiniteAreaLight() {
     delete distribution;
     delete radianceMap;
+    delete[] backgroundTex;
 }
 
 
 InfiniteAreaLight::InfiniteAreaLight(const Transform &light2world,
-        const Spectrum &L, int ns, const string &texmap)
+        const Spectrum &L, int ns, const string &texmap, const string &background)
     : Light(light2world, ns) {
     int width = 0, height = 0;
     RGBSpectrum *texels = NULL;
+    backgroundTex = nullptr;
+    if (background != "") {
+        int w2 = 0, h2 = 0;
+        backgroundTex = ReadImage(background, &w2, &h2);
+    }
     // Read texel data from _texmap_ into _texels_
     if (texmap != "") {
         texels = ReadImage(texmap, &width, &height);
@@ -186,9 +192,10 @@ InfiniteAreaLight *CreateInfiniteLight(const Transform &light2world,
     Spectrum L = paramSet.FindOneSpectrum("L", Spectrum(1.0));
     Spectrum sc = paramSet.FindOneSpectrum("scale", Spectrum(1.0));
     string texmap = paramSet.FindOneFilename("mapname", "");
+    string background = paramSet.FindOneFilename("background", "");
     int nSamples = paramSet.FindOneInt("nsamples", 1);
     if (PbrtOptions.quickRender) nSamples = max(1, nSamples / 4);
-    return new InfiniteAreaLight(light2world, L * sc, nSamples, texmap);
+    return new InfiniteAreaLight(light2world, L * sc, nSamples, texmap, background);
 }
 
 

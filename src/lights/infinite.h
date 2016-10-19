@@ -49,7 +49,7 @@ class InfiniteAreaLight : public Light {
 public:
     // InfiniteAreaLight Public Methods
     InfiniteAreaLight(const Transform &light2world, const Spectrum &power, int ns,
-        const string &texmap);
+        const string &texmap, const string &background);
     ~InfiniteAreaLight();
     Spectrum Power(const Scene *) const;
     bool IsDeltaLight() const { return false; }
@@ -65,6 +65,7 @@ private:
     // InfiniteAreaLight Private Data
     MIPMap<RGBSpectrum> *radianceMap;
     Distribution2D *distribution;
+    RGBSpectrum *backgroundTex;
 };
 
 
