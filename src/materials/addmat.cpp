@@ -45,12 +45,12 @@ BSDF *AddMaterial::GetBSDF(const DifferentialGeometry &dgGeom,
 	MemoryArena &arena) const {
 	BSDF *b1 = m1->GetBSDF(dgGeom, dgShading, arena);
 	BSDF *b2 = m2->GetBSDF(dgGeom, dgShading, arena);
-	Spectrum s = scale;// ->Evaluate(dgShading).Clamp();
+	//const Spectrum s = scale;// ->Evaluate(dgShading).Clamp();
 	int n1 = b1->NumComponents(), n2 = b2->NumComponents();
 	for (int i = 0; i < n1; ++i)
-		b1->bxdfs[i] = BSDF_ALLOC(arena, ScaledBxDF)(b1->bxdfs[i], s);
+		b1->bxdfs[i] = BSDF_ALLOC(arena, ScaledBxDF)(b1->bxdfs[i], (Spectrum)scale);
 	for (int i = 0; i < n2; ++i)
-		b1->Add(BSDF_ALLOC(arena, ScaledBxDF)(b2->bxdfs[i], s));
+		b1->Add(BSDF_ALLOC(arena, ScaledBxDF)(b2->bxdfs[i], (Spectrum)scale));
 	return b1;
 }
 

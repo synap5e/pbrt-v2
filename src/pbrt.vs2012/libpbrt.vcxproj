@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -163,6 +163,7 @@
     <ClInclude Include="..\accelerators\bvh.h" />
     <ClInclude Include="..\accelerators\grid.h" />
     <ClInclude Include="..\accelerators\kdtreeaccel.h" />
+    <ClInclude Include="..\accelerators\octree.h" />
     <ClInclude Include="..\cameras\environment.h" />
     <ClInclude Include="..\cameras\orthographic.h" />
     <ClInclude Include="..\cameras\perspective.h" />
@@ -233,6 +234,8 @@
     <ClInclude Include="..\lights\point.h" />
     <ClInclude Include="..\lights\projection.h" />
     <ClInclude Include="..\lights\spot.h" />
+    <ClInclude Include="..\materials\addmat.h" />
+    <ClInclude Include="..\materials\chessPieceBlack.h" />
     <ClInclude Include="..\materials\glass.h" />
     <ClInclude Include="..\materials\kdsubsurface.h" />
     <ClInclude Include="..\materials\matte.h" />
@@ -246,6 +249,7 @@
     <ClInclude Include="..\materials\subsurface.h" />
     <ClInclude Include="..\materials\translucent.h" />
     <ClInclude Include="..\materials\uber.h" />
+    <ClInclude Include="..\materials\WhiteChessPiece.h" />
     <ClInclude Include="..\renderers\aggregatetest.h" />
     <ClInclude Include="..\renderers\createprobes.h" />
     <ClInclude Include="..\renderers\metropolis.h" />
@@ -276,6 +280,7 @@
     <ClInclude Include="..\textures\marble.h" />
     <ClInclude Include="..\textures\mix.h" />
     <ClInclude Include="..\textures\scale.h" />
+    <ClInclude Include="..\textures\trunk.h" />
     <ClInclude Include="..\textures\uv.h" />
     <ClInclude Include="..\textures\windy.h" />
     <ClInclude Include="..\textures\wrinkled.h" />
@@ -1097,6 +1102,7 @@
     <ClCompile Include="..\accelerators\bvh.cpp" />
     <ClCompile Include="..\accelerators\grid.cpp" />
     <ClCompile Include="..\accelerators\kdtreeaccel.cpp" />
+    <ClCompile Include="..\accelerators\octree.cpp" />
     <ClCompile Include="..\cameras\environment.cpp" />
     <ClCompile Include="..\cameras\orthographic.cpp" />
     <ClCompile Include="..\cameras\perspective.cpp" />
@@ -1194,6 +1200,8 @@
     <ClCompile Include="..\lights\point.cpp" />
     <ClCompile Include="..\lights\projection.cpp" />
     <ClCompile Include="..\lights\spot.cpp" />
+    <ClCompile Include="..\materials\addmat.cpp" />
+    <ClCompile Include="..\materials\chessPieceBlack.cpp" />
     <ClCompile Include="..\materials\glass.cpp" />
     <ClCompile Include="..\materials\kdsubsurface.cpp" />
     <ClCompile Include="..\materials\matte.cpp" />
@@ -1207,6 +1215,7 @@
     <ClCompile Include="..\materials\subsurface.cpp" />
     <ClCompile Include="..\materials\translucent.cpp" />
     <ClCompile Include="..\materials\uber.cpp" />
+    <ClCompile Include="..\materials\WhiteChessPiece.cpp" />
     <ClCompile Include="..\renderers\aggregatetest.cpp" />
     <ClCompile Include="..\renderers\createprobes.cpp" />
     <ClCompile Include="..\renderers\metropolis.cpp" />
@@ -1237,6 +1246,7 @@
     <ClCompile Include="..\textures\marble.cpp" />
     <ClCompile Include="..\textures\mix.cpp" />
     <ClCompile Include="..\textures\scale.cpp" />
+    <ClCompile Include="..\textures\trunk.cpp" />
     <ClCompile Include="..\textures\uv.cpp" />
     <ClCompile Include="..\textures\windy.cpp" />
     <ClCompile Include="..\textures\wrinkled.cpp" />
@@ -1259,27 +1269,27 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

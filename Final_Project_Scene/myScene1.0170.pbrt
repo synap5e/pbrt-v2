@@ -1,0 +1,105 @@
+Film "image"
+	"integer xresolution" [768]
+	"integer yresolution" [512]
+	"string filename" ["myScene1.0170.tga"]
+
+Sampler "bestcandidate"
+
+SurfaceIntegrator "dipolesubsurface"
+	"float minsampledistance"[.1]
+	"float maxerror"[.05]
+	"float scale"[7]
+
+VolumeIntegrator "single" "float stepsize" [.5]
+
+Accelerator "bvh"
+	"integer maxnodeprims" [7]
+
+
+Scale -1 1 1
+LookAt 8.586028 -34.986996 32.457020
+	-5.611997 38.446437 -37.852906
+	-0.169883 0.664192 0.728004
+
+Camera "perspective"
+	"float fov" [65.470453]
+	"float focaldistance" [102.652514]
+	"float lensradius" [0.002500]
+	"float screenwindow" [-1.000000 1.000000 -0.666667 0.666667]
+	"float shutteropen" [0.000000]
+	"float shutterclose" [1.000000]
+
+
+WorldBegin
+
+	# background image
+	DifferentialBackground
+	"string filename"["textures/background2.exr"]
+	"string type" "exponential"
+	"float exposure"[5]
+# Translated Lambert Material lambert1
+MakeNamedMaterial "lambert1" "string type" ["matte"]
+	 "color Kd" [0.860800 0.933800 0.640800] 
+
+#pbrtTextNode blackChessMaterial
+MakeNamedMaterial "blackSpecularity" "string type" "plastic" "color Kd" [0 0 0 ] "color Ks" [0.4 0.4 0.4] "float roughness" [0.01]
+MakeNamedMaterial "blackMaterial" "string type" "blackchesspiece" "string type" "blackchesspiece" "color Kd" [0.02 0.02 0.02 ] "color Ks" [0.7 0.7 0.7] "color Kr" [0.1 0.1 0.1] "float uroughness" [0.3] "float vroughness" [0.5]  "float index" [1.4]
+MakeNamedMaterial "blackChessMaterial" "string type" "add" "float amount" [1] "string namedmaterial1" "blackSpecularity" "string namedmaterial2" "blackMaterial"
+
+
+#pbrtTextNode whiteChessMaterial
+MakeNamedMaterial "whiteChessMaterial" "string type" "whitechesspiece" "color Kd" [0.78 0.87 0.79 ] "color Ks" [0.98 0.95 0.89]  "color Ksss" [0.60 0.45 0.12  ]  "float meanfreepath" [2] "float index" [1.1] "color Kr" [0.22 0.2 0.15] "float uroughness" [0.4] "float vroughness" [0.4]
+
+#pbrtTextNode boardMaterial
+Texture "boardTex" "color"
+			"imagemap" "string filename" "textures/chessboard4.exr"
+			"float uscale" 1
+			"float vscale" -1
+MakeNamedMaterial "boardMaterial" "string type" ["uber"] "texture Kd" "boardTex" 
+
+#pbrtTextNode tableMaterial
+Texture "tableTex" "color"
+		"imagemap" "string filename" "textures/background.exr"
+		"float uscale" 1
+		"float vscale" -1
+MakeNamedMaterial "tableMaterial" "string type" ["uber"] "texture Kd" "tableTex" 
+
+# Directional Light |directionalLight1|directionalLightShape1
+TransformBegin
+	ConcatTransform [0.268711 -0.886019 0.377841 0.000000
+	                 0.788770 -0.022736 -0.614268 0.000000
+	                 0.552844 0.463091 0.692756 0.000000
+	                 0.047996 -0.001383 9.771755 1.000000]
+	LightSource "distant"
+		"color L" [2.700000 2.350000 2.400000]
+		"point from" [0 0 0]
+		"point to" [0 0 -1]
+TransformEnd
+
+# Text Box  |pbrtTextTransform1|localEnvLight
+TransformBegin
+	ConcatTransform [1.000000 0.000000 0.000000 0.000000
+	                 0.000000 0.000000 1.000000 0.000000
+	                 0.000000 -1.000000 0.000000 0.000000
+	                 0.000000 0.000000 0.000000 1.000000]
+	# distant scene
+	AttributeBegin
+		Rotate 90 0 1 0
+		Rotate -90 1 0 0
+		Scale -1 1 1
+	    LightSource "infinite"
+			"integer nsamples" [16]
+			"color L" [1.5 1.2 1] 			# Control the light intensity with these values
+			"string mapname" ["textures/envMap.exr"]
+	AttributeEnd
+TransformEnd
+
+Include "myScene1.0170.local.pbrt"
+SyntheticSceneBegin
+	Include "myScene1.0170.synthetic.pbrt"
+	Include "myScene1.0170.areaLgt.pbrt"
+	Include "myScene1.0170.volume.pbrt"
+SyntheticSceneEnd
+
+
+WorldEnd
