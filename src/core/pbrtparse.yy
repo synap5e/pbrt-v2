@@ -636,7 +636,7 @@ pbrt_stmt: ACCELERATOR STRING paramlist
 | WORLDEND
 {
     pbrtWorldEnd();
-};
+}
 
 | DIFFERENTIALBACKGROUND paramlist
 {
@@ -644,7 +644,7 @@ pbrt_stmt: ACCELERATOR STRING paramlist
     InitParamSet(params, SPECTRUM_ILLUMINANT);
     pbrtDifferentialBackground(params);
     FreeArgs();
-};
+}
 
 | SYNTHETICSCENEBEGIN
 {
@@ -654,7 +654,7 @@ pbrt_stmt: ACCELERATOR STRING paramlist
 | SYNTHETICSCENEEND
 {
     pbrtSyntheticSceneEnd();
-}
+};
 
 
 %%

@@ -912,6 +912,21 @@
     <ClInclude Include="..\core\targa.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\accelerators\octree.h">
+      <Filter>Header Files\accelerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textures\trunk.h">
+      <Filter>Header Files\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\materials\addmat.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\materials\chessPieceBlack.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\materials\WhiteChessPiece.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\ilmbase-1.0.2\half.cpp">
@@ -1681,6 +1696,21 @@
     </ClCompile>
     <ClCompile Include="..\core\targa.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\accelerators\octree.cpp">
+      <Filter>Source Files\accelerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textures\trunk.cpp">
+      <Filter>Source Files\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\materials\addmat.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\materials\chessPieceBlack.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\materials\WhiteChessPiece.cpp">
+      <Filter>Source Files\materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

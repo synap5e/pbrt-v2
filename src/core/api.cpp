@@ -84,6 +84,7 @@
 #include "materials/metal.h"
 #include "materials/mirror.h"
 #include "materials/chessPieceBlack.h"
+#include "materials/WhiteChessPiece.h"
 #include "materials/mixmat.h"
 #include "materials/addmat.h"
 #include "materials/plastic.h"
@@ -431,6 +432,8 @@ Reference<Material> MakeMaterial(const string &name,
         material = CreateUberMaterial(mtl2world, mp);
 	else if (name == "blackchesspiece")
 		material = CreateChessPieceBlackMaterial(mtl2world, mp);
+	else if (name == "whitechesspiece")
+		material = CreateWhiteChessPieceMaterial(mtl2world, mp);
     else if (name == "subsurface")
         material = CreateSubsurfaceMaterial(mtl2world, mp);
     else if (name == "kdsubsurface")
