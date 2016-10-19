@@ -61,11 +61,14 @@ public:
     float Pdf(const Point &, const Vector &) const;
     void SHProject(const Point &p, float pEpsilon, int lmax, const Scene *scene,
         bool computeLightVis, float time, RNG &rng, Spectrum *coeffs) const;
+
+    RGBSpectrum *backgroundTex = nullptr;
+    int backgroundW = 0, backgroundH = 0;
 private:
     // InfiniteAreaLight Private Data
     MIPMap<RGBSpectrum> *radianceMap;
     Distribution2D *distribution;
-    RGBSpectrum *backgroundTex;
+
 };
 
 

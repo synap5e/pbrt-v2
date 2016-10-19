@@ -73,8 +73,8 @@ InfiniteAreaLight::InfiniteAreaLight(const Transform &light2world,
     RGBSpectrum *texels = NULL;
     backgroundTex = nullptr;
     if (background != "") {
-        int w2 = 0, h2 = 0;
-        backgroundTex = ReadImage(background, &w2, &h2);
+
+        backgroundTex = ReadImage(background, &backgroundW, &backgroundH);
     }
     // Read texel data from _texmap_ into _texels_
     if (texmap != "") {

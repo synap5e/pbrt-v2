@@ -41,7 +41,7 @@ WorldBegin
 
 	# background image
 	DifferentialBackground
-		"string filename" ["textures/background2.exr"]
+		"string filename" ["textures/background.exr"]
 		"string type" "exponential"
 		"float exposure" [5]
 		#"float scale" [1]
@@ -54,6 +54,7 @@ WorldBegin
 			"integer nsamples" [16]
 			"color L" [1.5 1.2 1] 			# Control the light intensity with these values
 			"string mapname" ["textures/envMap.exr"]
+			"string background" ["textures/background.exr"]
 	AttributeEnd
 	
 	# Directional Light |directionalLight1|directionalLightShape1

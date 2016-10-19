@@ -240,12 +240,16 @@ Spectrum SamplerRenderer::Li(const Scene *scene,
     else {
         // Handle ray that doesn't intersect any geometry
         for (uint32_t i = 0; i < scene->lights.size(); ++i){
-            Li += scene->lights[i]->Le(ray);
-            /*
             if(InfiniteAreaLight* v = dynamic_cast<InfiniteAreaLight*>(scene->lights[i])) {
+                if (v->backgroundTex == nullptr){
+                    Li += scene->lights[i]->Le(ray);
+                } else {
+                    Li += v->backgroundTex[int(sample->imageX) + int(sample->imageY) * v->backgroundW];
+                }
             } else {
+                Li += scene->lights[i]->Le(ray);
             }
-            */
+
 
         }
     }
