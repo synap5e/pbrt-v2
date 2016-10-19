@@ -1,4 +1,6 @@
 Film "image"
+	# "integer xresolution" [1920]
+	# "integer yresolution" [1280]
 	"integer xresolution" [768]
 	"integer yresolution" [512]
 	"string filename" ["myScene1.exr"]
@@ -16,11 +18,11 @@ SurfaceIntegrator "dipolesubsurface"
 	"float minsampledistance" [.1]
 	"float maxerror" [.05]
 	"float scale" [7]
-	
+
+VolumeIntegrator "single" "float stepsize" [.2]
+
 Accelerator "bvh"
 	"integer maxnodeprims" [7]
-
-VolumeIntegrator "single" "float stepsize" [0.2]
 
 
 Scale -1 1 1
@@ -41,6 +43,7 @@ WorldBegin
 
 	# background image
 	DifferentialBackground
+		#"string filename" ["textures/background_full.exr"]
 		"string filename" ["textures/background.exr"]
 		"string type" "exponential"
 		"float exposure" [5]
@@ -49,11 +52,13 @@ WorldBegin
 	# distant scene
 	AttributeBegin
 		Rotate 90 0 0 1
+		Rotate 45 0 1 0
 		Scale -1 1 1
 	    LightSource "infinite"
-			"integer nsamples" [16]
+			"integer nsamples" [64]
 			"color L" [1.5 1.2 1] 			# Control the light intensity with these values
 			"string mapname" ["textures/envMap.exr"]
+			# "string background" ["textures/background_full.exr"]
 			"string background" ["textures/background.exr"]
 	AttributeEnd
 	
@@ -65,6 +70,7 @@ WorldBegin
 						 0.047996 -0.001383 9.771755 1.000000]
 		LightSource "distant"
 			"color L" [2.7 2.35 2.4]
+			"integer nsamples" [64]
 			"point from" [0 0 0]
 			"point to" [0 0 -1]
 	TransformEnd
@@ -72,7 +78,7 @@ WorldBegin
 	# local scene
 	AttributeBegin
 	Texture "tmap" "color"
-			"imagemap" "string filename" "textures/chessboard4.exr"
+			"imagemap" "string filename" "textures/chess_lg_3.exr"
 			"float uscale" 1
 			"float vscale" -1
 			
@@ -121,7 +127,22 @@ MakeNamedMaterial "phong2" "string type" "whitechesspiece" "color Kd" [0.78 0.87
 	# synthetic objects
 	SyntheticSceneBegin
 		Include "myScene1.synth.pbrt"
-		
+
+		AttributeBegin
+			ConcatTransform [-0.386872 -0.153205 -0.000000 0.000000
+	                    -0.000000 0.000000 0.416103 0.000000
+	                    -0.153205 0.386872 0.000000 0.000000
+	                    -10.038820 -8.972064 1.942278 1.000000]
+			Scale 8 8 8
+			Translate 0 0 0
+			Rotate 20 0 1 0
+			Volume "vortex" "integer nx" 100 "integer ny" 100 "integer nz" 40
+			  "point p0" [-1 -1 -1] "point p1" [ 1 2 1 ]
+			  "color sigma_a" [1 1 2]
+			  "color sigma_s" [6 6 4]
+			  "color Le" [1 1 10]
+		AttributeEnd
+
 		AttributeBegin
 	 	Material "mirror"
 	 	Translate -1.6 1.1 1

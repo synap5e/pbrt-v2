@@ -1224,47 +1224,117 @@ void pbrtWorldEnd() {
             exit(-1);
         }
 
-        // render the full scene (local + synthetic)
-        std::cout << "Rendering full scene" << std::endl;
-        float *full = new float[width * height * 3];
-        renderOptions->filmMemoryDestination = full;
-        Renderer *fullRenderer = renderOptions->MakeRenderer();
-        Scene *fullScene = renderOptions->MakeScene(true, true);
-        fullRenderer->Render(fullScene);
-        WriteImage("full.exr", full, NULL, width, height, width, height, 0, 0);
+        bool reuse = false;
 
         // render only the local scene
         std::cout << "Rendering local scene" << std::endl;
         float *local = new float[width * height * 3];
-        renderOptions->filmMemoryDestination = local;
-        Renderer *localRenderer = renderOptions->MakeRenderer();
-        Scene *localScene = renderOptions->MakeScene(false, true);
-        localRenderer->Render(localScene);
-        WriteImage("local.exr", local, NULL, width, height, width, height, 0, 0);
+        if (reuse){
+            RGBSpectrum *localSpec = ReadImage("local.exr", &width, &height);
+            for (int i=0; i<width*height; ++i){
+                float rgb[3];
+                localSpec[i].ToRGB(rgb);
+                local[i*3 + 0] = rgb[0];
+                local[i*3 + 1] = rgb[1];
+                local[i*3 + 2] = rgb[2];
+            }
+        } else {
+            renderOptions->filmMemoryDestination = local;
+            Renderer *localRenderer = renderOptions->MakeRenderer();
+            Scene *localScene = renderOptions->MakeScene(false, true);
+            localRenderer->Render(localScene);
+            WriteImage("local.exr", local, NULL, width, height, width, height, 0, 0);
+        }
+
+        // render the full scene (local + synthetic)
+        std::cout << "Rendering full scene" << std::endl;
+        float *full = new float[width * height * 3];
+        if (reuse){
+            RGBSpectrum *fullSpec = ReadImage("full.exr", &width, &height);
+            for (int i=0; i<width*height; ++i){
+                float rgb[3];
+                fullSpec[i].ToRGB(rgb);
+                full[i*3 + 0] = rgb[0];
+                full[i*3 + 1] = rgb[1];
+                full[i*3 + 2] = rgb[2];
+            }
+        } else {
+            renderOptions->filmMemoryDestination = full;
+            Renderer *fullRenderer = renderOptions->MakeRenderer();
+            Scene *fullScene = renderOptions->MakeScene(true, true);
+            fullRenderer->Render(fullScene);
+            WriteImage("full.exr", full, NULL, width, height, width, height, 0, 0);
+        }
 
         // render only the synthetic scene
         std::cout << "Rendering synthetic scene" << std::endl;
         float *synthetic = new float[width * height * 3];
-        renderOptions->filmMemoryDestination = synthetic;
-        Renderer *syntheticRenderer = renderOptions->MakeRenderer();
-        Scene *syntheticScene = renderOptions->MakeScene(true, false);
-        syntheticRenderer->Render(syntheticScene);
-        WriteImage("synthetic.exr", synthetic, NULL, width, height, width, height, 0, 0);
+        if (reuse){
+            RGBSpectrum *syntheticSpec = ReadImage("synthetic.exr", &width, &height);
+            for (int i=0; i<width*height; ++i){
+                float rgb[3];
+                syntheticSpec[i].ToRGB(rgb);
+                synthetic[i*3 + 0] = rgb[0];
+                synthetic[i*3 + 1] = rgb[1];
+                synthetic[i*3 + 2] = rgb[2];
+            }
+        } else {
+            renderOptions->filmMemoryDestination = synthetic;
+            Renderer *syntheticRenderer = renderOptions->MakeRenderer();
+            Scene *syntheticScene = renderOptions->MakeScene(true, false);
+            syntheticRenderer->Render(syntheticScene);
+            WriteImage("synthetic.exr", synthetic, NULL, width, height, width, height, 0, 0);
+        }
 
         // render only the environment map
         std::cout << "Rendering empty scene" << std::endl;
         float *environment = new float[width * height * 3];
-        renderOptions->filmMemoryDestination = environment;
-        Renderer *environmentRenderer = renderOptions->MakeRenderer();
-        Scene *environmentScene = renderOptions->MakeScene(false, false);
-        environmentRenderer->Render(environmentScene);
-        WriteImage("environment.exr", environment, NULL, width, height, width, height, 0, 0);
+        if (reuse){
+            RGBSpectrum *environmentSpec = ReadImage("environment.exr", &width, &height);
+            for (int i=0; i<width*height; ++i){
+                float rgb[3];
+                environmentSpec[i].ToRGB(rgb);
+                environment[i*3 + 0] = rgb[0];
+                environment[i*3 + 1] = rgb[1];
+                environment[i*3 + 2] = rgb[2];
+            }
+        } else {
+            renderOptions->filmMemoryDestination = environment;
+            Renderer *environmentRenderer = renderOptions->MakeRenderer();
+            Scene *environmentScene = renderOptions->MakeScene(false, false);
+            environmentRenderer->Render(environmentScene);
+            WriteImage("environment.exr", environment, NULL, width, height, width, height, 0, 0);
+        }
+
+        // std::cout << "Rendering shadow scene" << std::endl;
+        // float *shadow = new float[width * height * 3];
+        // if (reuse){
+        //     RGBSpectrum *shadowSpec = ReadImage("shadow.exr", &width, &height);
+        //     for (int i=0; i<width*height; ++i){
+        //         float rgb[3];
+        //         shadowSpec[i].ToRGB(rgb);
+        //         shadow[i*3 + 0] = rgb[0];
+        //         shadow[i*3 + 1] = rgb[1];
+        //         shadow[i*3 + 2] = rgb[2];
+        //     }
+        // } else {
+        //     renderOptions->filmMemoryDestination = shadow;
+        //     Renderer *shadowRenderer = renderOptions->MakeRenderer();
+        //     Scene *shadowScene = renderOptions->MakeScene(true, true);
+        //     for (uint32_t i = 0; i < shadowScene->lights.size(); ++i){
+        //         if(InfiniteAreaLight* v = dynamic_cast<InfiniteAreaLight*>(shadowScene->lights[i])) {
+        //             shadowScene->lights.erase(shadowScene->lights.begin()+i);
+        //         }
+        //     }
+        //     shadowRenderer->Render(shadowScene);
+        //     WriteImage("shadow.exr", shadow, NULL, width, height, width, height, 0, 0);
+        // }
 
         float *mask = new float[width * height];
         for (int i=0; i<width*height; ++i){
             float diff = fabs(synthetic[i*3 + 0] - environment[i*3 + 0]) +
-                            fabs(synthetic[i*3 + 1] - environment[i*3 + 1]) +
-                            fabs(synthetic[i*3 + 2] - environment[i*3 + 2]);
+                         fabs(synthetic[i*3 + 1] - environment[i*3 + 1]) +
+                         fabs(synthetic[i*3 + 2] - environment[i*3 + 2]);
             mask[i] = diff > std::numeric_limits<float>::epsilon() ? 1 : 0;
         }
         float *maskVis = new float[width * height * 3];
@@ -1272,6 +1342,23 @@ void pbrtWorldEnd() {
             maskVis[i*3 + 0] = maskVis[i*3 + 1] = maskVis[i*3 + 2] = mask[i];
         }
         WriteImage("mask.exr", maskVis, NULL, width, height, width, height, 0, 0);
+
+        // float *shadowMask = new float[width * height];
+        // for (int i=0; i<width*height; ++i){
+        //     if (mask[i] == 0.f){
+        //     float diff = fabs(local[i*3 + 0] - full[i*3 + 0]) +
+        //                  fabs(local[i*3 + 1] - full[i*3 + 1]) +
+        //                  fabs(local[i*3 + 2] - full[i*3 + 2]);
+        //         shadowMask[i] = diff > 0.03f ? 1.f : 0.f;
+        //     } else {
+        //         shadowMask[i] = 0.f;
+        //     }
+        // }
+        // float *shadowMaskVis = new float[width * height * 3];
+        // for (int i=0; i<width*height; ++i){
+        //     shadowMaskVis[i*3 + 0] = shadowMaskVis[i*3 + 1] = shadowMaskVis[i*3 + 2] = shadowMask[i];
+        // }
+        // WriteImage("shadowMask.exr", shadowMaskVis, NULL, width, height, width, height, 0, 0);
 
         float *syntheticLighting = new float[width * height * 3];
         for (int i=0; i<width*height; ++i){
@@ -1291,9 +1378,16 @@ void pbrtWorldEnd() {
         for (int i=0; i<width*height; ++i){
             float bg[3];
             background[i].ToRGB(bg);
-            composit[i*3 + 0] = bg[0] * (1.f - mask[i]) + full[i*3 + 0] * mask[i] + syntheticLighting[i*3 + 0];
-            composit[i*3 + 1] = bg[1] * (1.f - mask[i]) + full[i*3 + 1] * mask[i] + syntheticLighting[i*3 + 1];
-            composit[i*3 + 2] = bg[2] * (1.f - mask[i]) + full[i*3 + 2] * mask[i] + syntheticLighting[i*3 + 2];
+            // if (shadowMask[i] > 0){
+            //     composit[i*3 + 0] = full[i*3 + 0];
+            //     composit[i*3 + 1] = full[i*3 + 1];
+            //     composit[i*3 + 2] = full[i*3 + 2];
+            // } else {
+                composit[i*3 + 0] = bg[0] * (1.f - mask[i]) + full[i*3 + 0] * mask[i] + syntheticLighting[i*3 + 0] * (1.f - mask[i]);
+                composit[i*3 + 1] = bg[1] * (1.f - mask[i]) + full[i*3 + 1] * mask[i] + syntheticLighting[i*3 + 1] * (1.f - mask[i]);
+                composit[i*3 + 2] = bg[2] * (1.f - mask[i]) + full[i*3 + 2] * mask[i] + syntheticLighting[i*3 + 2] * (1.f - mask[i]);
+            //}
+
         }
         WriteImage("composit.exr", composit, NULL, width, height, width, height, 0, 0);
 
