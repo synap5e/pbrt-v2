@@ -296,7 +296,7 @@ Spectrum DipoleSubsurfaceIntegrator::Li(const Scene *scene, const Renderer *rend
             FresnelDielectric fresnel(1.f, bssrdf->eta());
             Spectrum Ft = Spectrum(1.f) - fresnel.Evaluate(AbsDot(wo, n));
             float Fdt = 1.f - Fdr(bssrdf->eta());
-            L += (INV_PI * Ft) * (Fdt * Mo);
+			L += (INV_PI * Ft) * (Fdt * Mo) * sssScale;
             PBRT_SUBSURFACE_FINISHED_OCTREE_LOOKUP();
         }
     }
@@ -351,9 +351,10 @@ DipoleSubsurfaceIntegrator *CreateDipoleSubsurfaceIntegrator(const ParamSet &par
     int maxDepth = params.FindOneInt("maxdepth", 5);
     float maxError = params.FindOneFloat("maxerror", .05f);
     float minDist = params.FindOneFloat("minsampledistance", .25f);
+	float scale = params.FindOneFloat("scale", 1.f);
     string pointsfile = params.FindOneFilename("pointsfile", "");
     if (PbrtOptions.quickRender) { maxError *= 4.f; minDist *= 4.f; }
-    return new DipoleSubsurfaceIntegrator(maxDepth, maxError, minDist, pointsfile);
+	return new DipoleSubsurfaceIntegrator(maxDepth, maxError, minDist, scale, pointsfile);
 }
 
 

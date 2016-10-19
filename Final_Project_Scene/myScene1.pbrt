@@ -15,6 +15,7 @@ Sampler "bestcandidate"
 SurfaceIntegrator "dipolesubsurface"
 	"float minsampledistance" [.1]
 	"float maxerror" [.05]
+	"float scale" [7]
 	
 Accelerator "bvh"
 	"integer maxnodeprims" [7]
@@ -38,7 +39,7 @@ WorldBegin
 
 	# background image
 	DifferentialBackground
-		"string filename" ["textures/background.exr"]
+		"string filename" ["textures/background2.exr"]
 		"string type" "exponential"
 		"float exposure" [5]
 		#"float scale" [1]
@@ -105,9 +106,8 @@ MakeNamedMaterial "blackMaterial" "string type" "blackchesspiece" "string type" 
 MakeNamedMaterial "phong1" "string type" "add" "float amount" [1] "string namedmaterial1" "blackSpecularity" "string namedmaterial2" "blackMaterial"
 
 # Translated Blinn Material phong2 (White)
-MakeNamedMaterial "phong2" "string type" ["plastic"] "color Kd" [.87 .72 .4 ] "color Ks" [1 1 1] "float roughness" [.001] #"float vroughness" [.001]
-# MakeNamedMaterial "phong2" "string type" ["subsurface"] 
-# "color sigma_a" [ .001 .002 .005] "color sigma_prime_s" [7 5 2] "float index" [1.46] "float scale" [.1]
+MakeNamedMaterial "phong2" "string type" "whitechesspiece" "color Kd" [0.78 0.87 0.79 ] "color Ks" [0.98 0.95 0.89]  "color Ksss" [0.60 0.45 0.12  ]  "float meanfreepath" [2] "float index" [1.1] "color Kr" [0.22 0.2 0.15] "float uroughness" [0.4] "float vroughness" [0.4]
+
 
         #AttributeBegin
         #CoordSysTransform "camera"

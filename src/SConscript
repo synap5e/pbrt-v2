@@ -61,7 +61,7 @@ materials_src = [ 'materials/glass.cpp',         'materials/kdsubsurface.cpp',
                   'materials/substrate.cpp',     'materials/subsurface.cpp',
                   'materials/translucent.cpp',   'materials/uber.cpp',
                   'materials/shinymetal.cpp',	 'materials/addmat.cpp',
-				  'materials/chessPieceBlack.cpp',
+				  'materials/chessPieceBlack.cpp', 'materials/WhiteChessPiece.cpp',
                   ]
 renderers_src = [ 'renderers/aggregatetest.cpp',   'renderers/createprobes.cpp',
                   'renderers/metropolis.cpp',      'renderers/samplerrenderer.cpp',
