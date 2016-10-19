@@ -20,6 +20,8 @@ SurfaceIntegrator "dipolesubsurface"
 Accelerator "bvh"
 	"integer maxnodeprims" [7]
 
+VolumeIntegrator "single" "float stepsize" [0.2]
+
 
 Scale -1 1 1
 LookAt 8.586028 -34.986996 32.457020

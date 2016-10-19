@@ -129,6 +129,7 @@
 #include "volumes/exponential.h"
 #include "volumes/homogeneous.h"
 #include "volumes/volumegrid.h"
+#include "volumes/vortex.h"
 #include <map>
  #if (_MSC_VER >= 1400)
  #include <stdio.h>
@@ -560,6 +561,8 @@ VolumeRegion *MakeVolumeRegion(const string &name,
         vr = CreateHomogeneousVolumeDensityRegion(volume2world, paramSet);
     else if (name == "volumegrid")
         vr = CreateGridVolumeRegion(volume2world, paramSet);
+    else if (name == "vortex")
+        vr = CreateVortexVolumeRegion(volume2world, paramSet);
     else if (name == "exponential")
         vr = CreateExponentialVolumeRegion(volume2world, paramSet);
     else
@@ -1205,7 +1208,6 @@ void pbrtWorldEnd() {
 
     // Create scene and render
     if (renderOptions->differentialRender){
-
         // get the background
         string filename = renderOptions->differentialBackground.FindOneFilename("filename", "");
         if (filename.empty()){
@@ -1321,7 +1323,7 @@ void pbrtWorldEnd() {
 Scene *RenderOptions::MakeScene(bool includeSynthetic, bool includeLocal) {
     // Initialize _volumeRegion_ from volume region(s)
     VolumeRegion *volumeRegion;
-    if (volumeRegions.size() == 0)
+    if (volumeRegions.size() == 0 || !includeSynthetic)
         volumeRegion = NULL;
     else if (volumeRegions.size() == 1)
         volumeRegion = volumeRegions[0];
