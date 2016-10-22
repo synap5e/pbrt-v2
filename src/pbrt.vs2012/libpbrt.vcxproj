@@ -287,6 +287,7 @@
     <ClInclude Include="..\volumes\exponential.h" />
     <ClInclude Include="..\volumes\homogeneous.h" />
     <ClInclude Include="..\volumes\volumegrid.h" />
+    <ClInclude Include="..\volumes\vortex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\ilmbase-1.0.2\half.cpp">
@@ -1253,6 +1254,7 @@
     <ClCompile Include="..\volumes\exponential.cpp" />
     <ClCompile Include="..\volumes\homogeneous.cpp" />
     <ClCompile Include="..\volumes\volumegrid.cpp" />
+    <ClCompile Include="..\volumes\vortex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\core\pbrtlex.ll" />

@@ -927,6 +927,9 @@
     <ClInclude Include="..\materials\WhiteChessPiece.h">
       <Filter>Header Files\materials</Filter>
     </ClInclude>
+    <ClInclude Include="..\volumes\vortex.h">
+      <Filter>Header Files\volumes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\ilmbase-1.0.2\half.cpp">
@@ -1711,6 +1714,9 @@
     </ClCompile>
     <ClCompile Include="..\materials\WhiteChessPiece.cpp">
       <Filter>Source Files\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\volumes\vortex.cpp">
+      <Filter>Source Files\volumes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
