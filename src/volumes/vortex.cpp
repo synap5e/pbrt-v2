@@ -11,6 +11,7 @@ float fmap(float x, float omin, float omax, float nmin, float nmax){
 // VolumeVortex Method Definitions
 float VolumeVortex::Density(const Point &Pobj) const {
     if (!extent.Inside(Pobj)) return 0;
+	if (Pobj.y < killbelow) return 0;
 
     Vector dpdx, dpdy;
 
@@ -18,7 +19,7 @@ float VolumeVortex::Density(const Point &Pobj) const {
     float cy = (extent.pMin.y + extent.pMax.y) / 2.f;
     float cz = (extent.pMin.z + extent.pMax.z) / 2.f;
 
-    float ox = Pobj.x - cx + 0.1;
+    float ox = Pobj.x - cx;
     float oy = Pobj.y - cy;
     float oz = Pobj.z - cz;
 
@@ -39,18 +40,14 @@ float VolumeVortex::Density(const Point &Pobj) const {
 
     float lower_limit = fmap(dist_from_axis, 0, radius, 0.f, 1.f);
 
-    float p = 1.8f;
-    float s = 1.5f;
-    float b = 6.f;
-    float a = 0.75f;
-
     lower_limit = b / (1.f + exp(-s * (lower_limit - p))) + a;
     lower_limit -= (1.f - fraction_from_base);
     if (fraction_from_base > 0.8){
         lower_limit += (fraction_from_base - 0.8f) * 3;
     }
 
-    return Clamp(Turbulence(Pobj, dpdx, dpdy, 1.f, 6) - lower_limit, 0.f, 1.f);
+	Point ip(ox + step, oy, oz);
+    return Clamp(Turbulence(ip, dpdx, dpdy, 1.f, 6) - lower_limit, 0.f, 1.f) ;
 }
 
 
@@ -63,7 +60,16 @@ VolumeVortex *CreateVortexVolumeRegion(const Transform &volume2world,
     Spectrum Le = params.FindOneSpectrum("Le", 0.);
     Point p0 = params.FindOnePoint("p0", Point(0,0,0));
     Point p1 = params.FindOnePoint("p1", Point(1,1,1));
-    return new VolumeVortex(sigma_a, sigma_s, g, Le, BBox(p0, p1), volume2world);
+
+	float killbelow = params.FindOneFloat("killbelow", 0.);
+	float step = params.FindOneFloat("step", 0.);
+
+	float p = params.FindOneFloat("p", 1.8f);
+	float s = params.FindOneFloat("s", 1.5f);
+	float b = params.FindOneFloat("b", 6.f);
+	float a = params.FindOneFloat("a", 0.75f);
+
+	return new VolumeVortex(sigma_a, sigma_s, g, Le, BBox(p0, p1), killbelow, step, p, s, b, a, volume2world);
 }
 
 

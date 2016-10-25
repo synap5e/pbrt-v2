@@ -17,8 +17,14 @@ public:
                  float gg,
                  const Spectrum &emit,
                  const BBox &e,
-                 const Transform &v2w)
-        : DensityRegion(sa, ss, gg, emit, v2w), extent(e) {
+				 const float killbelow,
+				 const float step,
+				 const float p,
+				 const float s,
+				 const float b,
+				 const float a,
+				 const Transform &v2w)
+				 : DensityRegion(sa, ss, gg, emit, v2w), extent(e), killbelow(killbelow), step(step), p(p), s(s), b(b), a(a){
     }
     ~VolumeVortex() { }
     BBox WorldBound() const { return Inverse(WorldToVolume)(extent); }
@@ -30,6 +36,13 @@ public:
 private:
     // VolumeVortex Private Data
     const BBox extent;
+	const float killbelow;
+	const float step;
+
+	const float p;
+	const float s;
+	const float b;
+	const float a;
 };
 
 
