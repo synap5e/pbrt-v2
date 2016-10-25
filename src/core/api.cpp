@@ -139,6 +139,7 @@
 using std::map;
 
 #include <limits>
+#include <fstream>
 
 // API Global Variables
 Options PbrtOptions;
@@ -1224,6 +1225,30 @@ void pbrtWorldEnd() {
             exit(-1);
         }
 
+        // render only the local scene
+        std::cout << "Rendering local scene" << std::endl;
+        float *local = new float[width * height * 3];
+        string s = "local.exr";
+        std::ifstream test(s.c_str());
+        if (test.good()){
+            std::cout << "Reusing local.exr" << std::endl;
+            RGBSpectrum *localSpec = ReadImage("local.exr", &width, &height);
+            for (int i = 0; i<width*height; ++i){
+                float rgb[3];
+                localSpec[i].ToRGB(rgb);
+                local[i * 3 + 0] = rgb[0];
+                local[i * 3 + 1] = rgb[1];
+                local[i * 3 + 2] = rgb[2];
+            }
+        }
+        else {
+            renderOptions->filmMemoryDestination = local;
+            Renderer *localRenderer = renderOptions->MakeRenderer();
+            Scene *localScene = renderOptions->MakeScene(false, true);
+            localRenderer->Render(localScene);
+            WriteImage("local.exr", local, NULL, width, height, width, height, 0, 0);
+        }
+
         // render the full scene (local + synthetic)
         std::cout << "Rendering full scene" << std::endl;
         float *full = new float[width * height * 3];
@@ -1233,14 +1258,6 @@ void pbrtWorldEnd() {
         fullRenderer->Render(fullScene);
         WriteImage("full.exr", full, NULL, width, height, width, height, 0, 0);
 
-        // render only the local scene
-        std::cout << "Rendering local scene" << std::endl;
-        float *local = new float[width * height * 3];
-        renderOptions->filmMemoryDestination = local;
-        Renderer *localRenderer = renderOptions->MakeRenderer();
-        Scene *localScene = renderOptions->MakeScene(false, true);
-        localRenderer->Render(localScene);
-        WriteImage("local.exr", local, NULL, width, height, width, height, 0, 0);
 
         // render only the synthetic scene
         std::cout << "Rendering synthetic scene" << std::endl;
