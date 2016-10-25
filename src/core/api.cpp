@@ -1256,6 +1256,8 @@ void pbrtWorldEnd() {
         Renderer *fullRenderer = renderOptions->MakeRenderer();
         Scene *fullScene = renderOptions->MakeScene(true, true);
         fullRenderer->Render(fullScene);
+        delete fullRenderer;
+        delete fullScene;
         WriteImage("full.exr", full, NULL, width, height, width, height, 0, 0);
 
 
@@ -1266,7 +1268,10 @@ void pbrtWorldEnd() {
         Renderer *syntheticRenderer = renderOptions->MakeRenderer();
         Scene *syntheticScene = renderOptions->MakeScene(true, false);
         syntheticRenderer->Render(syntheticScene);
+        delete syntheticRenderer;
+        delete syntheticScene;
         WriteImage("synthetic.exr", synthetic, NULL, width, height, width, height, 0, 0);
+
 
         // render only the environment map
         std::cout << "Rendering empty scene" << std::endl;
@@ -1275,6 +1280,8 @@ void pbrtWorldEnd() {
         Renderer *environmentRenderer = renderOptions->MakeRenderer();
         Scene *environmentScene = renderOptions->MakeScene(false, false);
         environmentRenderer->Render(environmentScene);
+        delete environmentRenderer;
+        delete syntheticScene;
         WriteImage("environment.exr", environment, NULL, width, height, width, height, 0, 0);
 
         float *mask = new float[width * height];
@@ -1316,8 +1323,13 @@ void pbrtWorldEnd() {
         WriteImage("composit.exr", composit, NULL, width, height, width, height, 0, 0);
 		WriteImage(renderOptions->FilmParams.FindOneFilename("filename", "pbrt.exr"), composit, NULL, width, height, width, height, 0, 0);
 
-        // FIXME: delete used memory
-        // FIXME: remove intermediate exr output
+        delete[] full;
+        delete[] local;
+        delete[] synthetic;
+        delete[] environment;
+        delete[] mask;
+        delete[] syntheticLighting;
+        delete[] composit;
 
     } else {
         Renderer *renderer = renderOptions->MakeRenderer();
