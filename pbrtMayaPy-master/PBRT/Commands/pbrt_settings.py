@@ -157,6 +157,7 @@ class pbrt_settings:
         self.addBool(ln = 'scene_export_materials' , dv = 1)
         self.addBool(ln = 'scene_export_defaultLighting' , dv = 1)
         self.addBool(ln = 'scene_export_volumes', dv = 1)
+        self.addBool(ln = 'scene_export_vortex', dv=1)
         
         # Camera settings
         self.addEnum( ln = 'camera_persptype', options = 'Perspective:Environment') #:Realistic' )

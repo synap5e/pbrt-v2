@@ -45,10 +45,12 @@ public:
     // VolumeGridDensity Public Methods
     VolumeGridDensity(const Spectrum &sa, const Spectrum &ss, float gg,
             const Spectrum &emit, const BBox &e, const Transform &v2w,
-            int x, int y, int z, const float *d)
-        : DensityRegion(sa, ss, gg, emit, v2w), nx(x), ny(y), nz(z), extent(e) {
+			int x, int y, int z, const float *d, const float *c)
+        : DensityRegion(sa, ss, gg, emit, v2w), nx(x), ny(y), nz(z), extent(e), em(emit) {
         density = new float[nx*ny*nz];
+		color = new float[nx*ny*nz*3];
         memcpy(density, d, nx*ny*nz*sizeof(float));
+		memcpy(color, c, nx*ny*nz*3*sizeof(float));
     }
     ~VolumeGridDensity() { delete[] density; }
     BBox WorldBound() const { return Inverse(WorldToVolume)(extent); }
@@ -61,11 +63,26 @@ public:
         x = Clamp(x, 0, nx-1);
         y = Clamp(y, 0, ny-1);
         z = Clamp(z, 0, nz-1);
-        return density[z*nx*ny + y*nx + x];
+		return density[z*nx*ny + y*nx + x];
     }
+
+	Spectrum Color(const Point &Pobj) const;
+	float C(int x, int y, int z, int offset) const {
+		x = Clamp(x, 0, nx - 1);
+		y = Clamp(y, 0, ny - 1);
+		z = Clamp(z, 0, nz - 1);
+		return color[(z*nx*ny + y*nx + x) * 3 + offset];
+	}
+
+	Spectrum Lve(const Point &p, const Vector &, float) const {
+		Point pointINVolume = WorldToVolume(p);
+		return Density(pointINVolume) * Color(pointINVolume) * em;
+	}
 private:
     // VolumeGridDensity Private Data
     float *density;
+	float *color = nullptr;
+	Spectrum em;
     const int nx, ny, nz;
     const BBox extent;
 };

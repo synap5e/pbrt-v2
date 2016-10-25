@@ -47,7 +47,8 @@ class AEpbrtSettingsNodeTemplate(pymelUI.AETemplate):
         self.addControl("scene_export_materials")
         self.addControl("scene_export_defaultLighting")
         self.addControl("scene_export_volumes")
-        
+        self.addControl("scene_export_vortex")
+
         self.endLayout()
 
         self.beginLayout("Camera",collapse=1)

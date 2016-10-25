@@ -53,7 +53,52 @@ float VolumeGridDensity::Density(const Point &Pobj) const {
     float d11 = Lerp(dx, D(vx, vy+1, vz+1), D(vx+1, vy+1, vz+1));
     float d0 = Lerp(dy, d00, d10);
     float d1 = Lerp(dy, d01, d11);
-    return Lerp(dz, d0, d1);
+	float amount = Lerp(dz, d0, d1);
+	return amount <= 0.2? 0 : amount;
+}
+
+// VolumeGridDensity Method Definitions
+Spectrum VolumeGridDensity::Color(const Point &Pobj) const {
+	if (!extent.Inside(Pobj)) return 0;
+	// Compute voxel coordinates and offsets for _Pobj_
+	Vector vox = extent.Offset(Pobj);
+	vox.x = vox.x * nx - .5f;
+	vox.y = vox.y * ny - .5f;
+	vox.z = vox.z * nz - .5f;
+	int vx = Floor2Int(vox.x), vy = Floor2Int(vox.y), vz = Floor2Int(vox.z);
+	float dx = vox.x - vx, dy = vox.y - vy, dz = vox.z - vz;
+
+	// Trilinearly interpolate density values to compute local density
+	float r00 = Lerp(dx, C(vx, vy, vz, 0), C(vx + 1, vy, vz, 0));
+	float r10 = Lerp(dx, C(vx, vy + 1, vz, 0), C(vx + 1, vy + 1, vz, 0));
+	float r01 = Lerp(dx, C(vx, vy, vz + 1, 0), C(vx + 1, vy, vz + 1, 0));
+	float r11 = Lerp(dx, C(vx, vy + 1, vz + 1, 0), C(vx + 1, vy + 1, vz + 1, 0));
+
+	float g00 = Lerp(dx, C(vx, vy, vz, 1), C(vx + 1, vy, vz, 1));
+	float g10 = Lerp(dx, C(vx, vy + 1, vz, 1), C(vx + 1, vy + 1, vz, 1));
+	float g01 = Lerp(dx, C(vx, vy, vz + 1, 1), C(vx + 1, vy, vz + 1, 1));
+	float g11 = Lerp(dx, C(vx, vy + 1, vz + 1, 1), C(vx + 1, vy + 1, vz + 1, 1));
+
+	float b00 = Lerp(dx, C(vx, vy, vz, 2), C(vx + 1, vy, vz, 2));
+	float b10 = Lerp(dx, C(vx, vy + 1, vz, 2), C(vx + 1, vy + 1, vz, 2));
+	float b01 = Lerp(dx, C(vx, vy, vz + 1, 2), C(vx + 1, vy, vz + 1, 2));
+	float b11 = Lerp(dx, C(vx, vy + 1, vz + 1, 2), C(vx + 1, vy + 1, vz + 1, 2));
+
+	float r0 = Lerp(dy, r00, r10);
+	float r1 = Lerp(dy, r01, r11);
+	float rFinal = Lerp(dz, r0, r1);
+
+	float g0 = Lerp(dy, g00, g10);
+	float g1 = Lerp(dy, g01, g11);
+	float gFinal = Lerp(dz, g0, g1);
+
+	float b0 = Lerp(dy, b00, b10);
+	float b1 = Lerp(dy, b01, b11);
+	float bFinal = Lerp(dz, b0, b1);
+	float col[3] = { Lerp(dz, r0, r1), Lerp(dz, g0, g1), Lerp(dz, b0, b1) };
+
+	Spectrum outColor = Spectrum::FromRGB(col);
+	return outColor;
 }
 
 
@@ -72,6 +117,12 @@ VolumeGridDensity *CreateGridVolumeRegion(const Transform &volume2world,
         Error("No \"density\" values provided for volume grid?");
         return NULL;
     }
+	int cnitems;
+	const float *color = params.FindFloat("color", &cnitems);
+	if (!data) {
+		Error("No \"color\" values provided for volume grid?");
+		return NULL;
+	}
     int nx = params.FindOneInt("nx", 1);
     int ny = params.FindOneInt("ny", 1);
     int nz = params.FindOneInt("nz", 1);
@@ -80,8 +131,13 @@ VolumeGridDensity *CreateGridVolumeRegion(const Transform &volume2world,
             nitems, nx*ny*nz);
         return NULL;
     }
+	if (cnitems != nx*ny*nz*3) {
+		Error("VolumeGridDensity has %d color values but nx*ny*nz*3 = %d",
+			cnitems, nx*ny*nz*3);
+		return NULL;
+	}
     return new VolumeGridDensity(sigma_a, sigma_s, g, Le, BBox(p0, p1),
-        volume2world, nx, ny, nz, data);
+		volume2world, nx, ny, nz, data, color);
 }
 
 

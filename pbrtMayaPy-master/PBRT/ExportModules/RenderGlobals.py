@@ -152,7 +152,7 @@ class RenderGlobals(ExportModule):
         """
         Export Volume Integrator Settings
         """
-        self.addToOutput('VolumeIntegrator "single" "float stepsize" [.5]')
+        self.addToOutput('VolumeIntegrator "single" "float stepsize" [.2]')
         self.addToOutput( '' )
 
         

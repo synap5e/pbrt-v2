@@ -91,16 +91,18 @@ class MeshOpt(ShadedObject):
         meshExporter = MeshOpt(fileHandles, dagPath)
         materialNode = meshExporter.findSurfaceShader()
         if materialNode!=None and materialNode.typeName() == "pbrtAreaLightMaterial":
-            if fileHandles[1]==0:
+            if fileHandles[2]==0:
                 return False
-            meshExporter.fileHandle = fileHandles[2]
+            meshExporter.fileHandle = fileHandles[3]
         else:
-            if fileHandles[0]==0 or fileHandles[1]==0:
+            if fileHandles[0]==0 or fileHandles[1]==0 or fileHandles[2]==0:
                 return False
             if "local" in meshExporter.fShape.name():
                 meshExporter.fileHandle = fileHandles[0]
-            else:
+            elif "static" in meshExporter.fShape.name():
                 meshExporter.fileHandle = fileHandles[1]
+            else:
+                meshExporter.fileHandle = fileHandles[2]
         return meshExporter
 
                         

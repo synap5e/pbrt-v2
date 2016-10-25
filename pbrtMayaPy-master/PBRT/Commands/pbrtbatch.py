@@ -173,12 +173,13 @@ class pbrtbatch(OpenMayaMPx.MPxCommand):
             os.mkdir( saveFolder )
 
         sceneFileBaseName = cmds.getAttr( 'pbrt_settings.scene_filename' ) + ('.%04i' % frameNumber)
+        staticFileBaseName = cmds.getAttr('pbrt_settings.scene_filename') + ('.%04i.%04i' % (self.startFrame, self.endFrame))
 
         renderFolder = saveFolder + os.altsep + "renders" + os.altsep
         if not os.path.exists(renderFolder):
             os.mkdir(renderFolder)
 
-        imageSaveName = renderFolder + sceneFileBaseName +'.'+ cmds.getAttr( 'pbrt_settings.image_format', asString = True )
+        imageSaveName = '../renderedImages/' + sceneFileBaseName +'.'+ cmds.getAttr( 'pbrt_settings.image_format', asString = True )
         self.imageSaveName = imageSaveName
 
         if tempExportPath:
@@ -196,13 +197,12 @@ class pbrtbatch(OpenMayaMPx.MPxCommand):
                 os.mkdir( saveFolder )
 
         sceneFileName = str(saveFolder + sceneFileBaseName + '.pbrt')
-
         renderWidth = cmds.getAttr( 'defaultResolution.width' )
         renderHeight = cmds.getAttr( 'defaultResolution.height' )
         verbosity = cmds.getAttr( 'pbrt_settings.verbosity' )
 
         # launch export proc here !
-        pe = Exporter.Exporter(sceneFileName, imageSaveName, renderWidth, renderHeight, renderCameraName, verbosity )
+        pe = Exporter.Exporter(sceneFileName, imageSaveName, saveFolder, sceneFileBaseName, staticFileBaseName, renderWidth, renderHeight, renderCameraName, verbosity )
         try:
             pe.doIt( )
         except:

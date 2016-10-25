@@ -31,6 +31,7 @@ import PBRT.ExportModules.Light as PBRTLight
 import PBRT.ExportModules.Material as PBRTMaterial
 import PBRT.ExportModules.Locator as PBRTLocator
 import PBRT.ExportModules.Volume as PBRTVolume
+reload(PBRTVolume)
 
 # Those reloads can be uncommented, to reload those modules without restating Maya
 # reload(PBRTCamera)
@@ -67,6 +68,9 @@ class Exporter:
     def __init__(self,
                  sceneFileName,
                  imageSaveName,
+                 saveFolder,
+                 baseName,
+                 staticBase,
                  renderWidth,
                  renderHeight,
                  renderCameraName,
@@ -80,11 +84,14 @@ class Exporter:
         self.renderHeight = renderHeight
         self.renderCameraName = renderCameraName
         self.verbosity = verbosity
-        
-        self.syntheticFileName = sceneFileName.replace(".pbrt", ".synthetic.pbrt")
-        self.localFileName = sceneFileName.replace(".pbrt", ".local.pbrt")
-        self.volumeFileName = sceneFileName.replace(".pbrt", ".volume.pbrt")
-        self.areaLightsFileName = sceneFileName.replace(".pbrt", ".areaLgt.pbrt")
+
+        self.savefolder = saveFolder
+        self.baseName = baseName
+        self.staticFileName = "../static/" + staticBase + ".pbrt"
+        self.syntheticFileName = baseName + ".synthetic.pbrt"
+        self.localFileName = "../static/local.pbrt"
+        self.volumeFileName = baseName + ".volume.pbrt"
+        self.areaLightsFileName = baseName + ".areaLgt.pbrt"
         sceneFilePathParts = sceneFileName.split( os.altsep ).pop()
         self.sceneFilePath = os.altsep.join(sceneFilePathParts) + os.altsep
         
@@ -141,15 +148,15 @@ class Exporter:
         self.dprint( self.renderCameraName )
         self.dprint( "-------------" )
 
-        currentFrame = OpenMayaAnim.MAnimControl.currentTime().asUnits(OpenMaya.MTime.kFilm)
-        self.sceneFileHandle.write('FrameNumber "float frame" [' + str(currentFrame) + ']' + os.linesep)
+        #currentFrame = OpenMayaAnim.MAnimControl.currentTime().asUnits(OpenMaya.MTime.kFilm)
+        #self.sceneFileHandle.write('FrameNumber "float frame" [' + str(currentFrame) + ']' + os.linesep)
 
         if not self.debug:
             self.sceneFileHandle.write( os.linesep + 'WorldBegin' + os.linesep + os.linesep )
 
         self.sceneFileHandle.write('\t# background image' + os.linesep)
         self.sceneFileHandle.write('\tDifferentialBackground' + os.linesep)
-        self.sceneFileHandle.write('\t"string filename"["textures/background2.exr"]' + os.linesep)
+        self.sceneFileHandle.write('\t"string filename"["../textures/background2.exr"]' + os.linesep)
         self.sceneFileHandle.write('\t"string type" "exponential"' + os.linesep)
         self.sceneFileHandle.write('\t"float exposure"[5]' + os.linesep)
 
@@ -159,19 +166,22 @@ class Exporter:
         # POLYGON MESHES
         
         if cmds.getAttr( 'pbrt_settings.scene_export_meshes' ) == 1:
-            try:        
-                self.meshLocalFileHandle = open(self.localFileName, "wb")
-                self.meshSyntheticFileHandle = open(self.syntheticFileName, "wb")
+            try:
+                self.meshLocalFileHandle = open(self.savefolder + self.localFileName, "wb")
+                self.dprint(self.savefolder + self.staticFileName)
+                self.meshStaticFileHandle = open(self.savefolder + self.staticFileName, "wb")
+                self.meshSyntheticFileHandle = open(self.savefolder + self.syntheticFileName, "wb")
             except:
                 OpenMaya.MGlobal.displayError( "Failed to open file %s for writing\n"%self.syntheticFileName )
                 raise  
         else:
             self.meshLocalFileHandle = 0
+            self.meshStaticFileHandle = 0
             self.meshSyntheticFileHandle = 0
 
         if cmds.getAttr( 'pbrt_settings.scene_export_arealights' ) == 1:
             try:        
-                self.areaLightsFileHandle = open(self.areaLightsFileName, "wb")
+                self.areaLightsFileHandle = open(self.savefolder + self.areaLightsFileName, "wb")
             except:
                 OpenMaya.MGlobal.displayError( "Failed to open file %s for writing\n"%self.areaLightsFileName )
                 raise  
@@ -180,7 +190,7 @@ class Exporter:
 
         if cmds.getAttr('pbrt_settings.scene_export_volumes') == 1:
             try:
-                self.volumeFileHandle = open(self.volumeFileName, "wb")
+                self.volumeFileHandle = open(self.savefolder + self.volumeFileName, "wb")
             except:
                 OpenMaya.MGlobal.displayError("Failed to open file %s for writing\n" % self.volumeFileName)
                 raise
@@ -190,11 +200,13 @@ class Exporter:
 
                 # loop through meshes
         areaLightsWereWritten = 0
-        self.exportType(OpenMaya.MFn.kMesh, PBRTMesh.MeshOpt.GeoFactory, "Mesh", (self.meshLocalFileHandle, self.meshSyntheticFileHandle, self.areaLightsFileHandle) )
+        self.exportType(OpenMaya.MFn.kMesh, PBRTMesh.MeshOpt.GeoFactory, "Mesh", (self.meshLocalFileHandle, self.meshStaticFileHandle, self.meshSyntheticFileHandle, self.areaLightsFileHandle) )
         self.exportType(OpenMaya.MFn.kFluid, PBRTVolume.Volume.VolumeFactory, "Volume", self.volumeFileHandle)
 
         if self.meshLocalFileHandle:
             self.meshLocalFileHandle.close()
+        if self.meshStaticFileHandle:
+            self.meshStaticFileHandle.close()
         if self.meshSyntheticFileHandle:
             self.meshSyntheticFileHandle.close()
         if self.areaLightsFileHandle:
@@ -204,6 +216,7 @@ class Exporter:
             self.volumeFileHandle.close()
 
         #includeFileList.append(self.meshLocalFileHandle)
+        includeFileList.append(self.staticFileName)
         includeFileList.append(self.syntheticFileName)
         includeFileList.append(self.areaLightsFileName)
         includeFileList.append(self.volumeFileName)
@@ -224,12 +237,12 @@ class Exporter:
         self.exportType( OpenMaya.MFn.kLocator, PBRTLocator.Locator.Factory, "Locator" )
 
         # WRITE INCLUDES IF EXTERNAL FILES EXIST
-        if os.path.exists(self.localFileName):
+        if os.path.exists(self.savefolder + self.localFileName):
             self.sceneFileHandle.write('Include "' + self.localFileName + '"' + os.linesep)
 
         self.sceneFileHandle.write('SyntheticSceneBegin' + os.linesep)
         for includeFile in includeFileList:
-            if os.path.exists(includeFile):
+            if os.path.exists(self.savefolder + includeFile):
                 self.sceneFileHandle.write('\tInclude "' + includeFile + '"' + os.linesep)
         self.sceneFileHandle.write('SyntheticSceneEnd' + os.linesep)
         self.sceneFileHandle.write(os.linesep)
